@@ -44,3 +44,24 @@ def matrix_Xdip(pos,alpha):
             if i!=j:
                 X[3*i:3*(i+1),3*j:3*(j+1)] = alpha[j]*eval_green(pos[:,i],pos[:,j])
     return X
+
+def matrix_TQdip(pos,alpha,lmax):
+    '''generates the Q matrix in the case of dipolar scatterers
+    with positions pos and polarizabilities alpha
+    pos has size (3,N) and alpha has size (1,N)
+    alpha is multiplied by k^3 to be adimensional
+    '''
+
+    N = pos.shape[1] # number of particles
+    Nsph = 2*lmax*(2*lmax+1) # number os spherical modes (with reduced notation)
+
+    Qi = np.zeros((Nsph,3))
+    Qi[lmax:lmax+3,:] = [[1,1j,0],
+                         [0,0,sqrt(2)],
+                         [-1,1j,0]]/np.sqrt(12*np.pi);
+
+    TQ = np.zeros((Nsph,3*N))
+    for i in range(N)
+        T = trans_h2h_reduced(pos[:,i],lmax) # size Nsph by Nsph
+        TQ[:,i*3:(i+1)*3] = alpha[i]*T*Qi # size Nsph by 3
+  
