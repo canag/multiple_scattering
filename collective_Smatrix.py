@@ -29,7 +29,7 @@ def matrix_Ddip(pos, alpha, lmax):
     D = np.dot(TQ, np.linalg.inv(np.eye(3*N) - X)).dot(FT)
     return D # size Nsph by Nsph
 
-def matrix_Xdip(pos,alpha):
+def matrix_Xdip(pos, alpha):
     '''generates the structure X matrix
     in the case of dipolar scatterers
     with positions pos and polarizabilities alpha
@@ -45,7 +45,7 @@ def matrix_Xdip(pos,alpha):
                 X[3*i:3*(i+1),3*j:3*(j+1)] = alpha[j]*eval_green(pos[:,i],pos[:,j])
     return X
 
-def matrix_TQdip(pos,alpha,lmax):
+def matrix_TQdip(pos, alpha, lmax):
     '''generates the Q matrix in the case of dipolar scatterers
     with positions pos and polarizabilities alpha
     pos has size (3,N) and alpha has size (1,N)
@@ -58,10 +58,9 @@ def matrix_TQdip(pos,alpha,lmax):
     Qi = np.zeros((Nsph,3))
     Qi[lmax:lmax+3,:] = [[1,1j,0],
                          [0,0,sqrt(2)],
-                         [-1,1j,0]]/np.sqrt(12*np.pi);
-
+                         [-1,1j,0]]/np.sqrt(12*np.pi)
     TQ = np.zeros((Nsph,3*N))
     for i in range(N)
         T = trans_h2h_reduced(pos[:,i],lmax) # size Nsph by Nsph
         TQ[:,i*3:(i+1)*3] = alpha[i]*T*Qi # size Nsph by 3
-  
+    return TQ
