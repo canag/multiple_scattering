@@ -259,8 +259,8 @@ def Arho_matrix(rho, lmax):
 	u_rho = eval_u1(2*lmax,rho)
 
 	for l1 in range(lmax+1): # from 0 to lmax 
-		for l2 in range(lmax+1): # from 0 to lmax 
-    		for m1 in range(-l1, l1+1): # from -l1 to l1
+		for l2 in range(lmax+1): # from 0 to lmax
+			for m1 in range(-l1, l1+1): # from -l1 to l1
 				for m2 in range(-l2, l2+2): # from -l2 to l2
 					i1 = l1*(2*lmax+1) + m1 + lmax
 					i2 = l2*(2*lmax+1) + m2 + lmax
