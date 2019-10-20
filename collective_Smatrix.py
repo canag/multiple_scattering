@@ -222,23 +222,22 @@ def Crho_matrix(rho, lmax):
 	for l1 in range(1, lmax+1):
 		for l2 in range(1, lmax+1):
 			K = -1j/np.sqrt(l1*(l1+1)*l2*(l2+1)) # scalar
-		    for m1 in range(-l1, l1+1):
-		        for m2 in range(-l2, l2+1):
-		        	# indices for C matrix
-		            i1 = (l1-1)*(2*lmax+1) + m1 + lmax
-		            i2 = (l2-1)*(2*lmax+1) + m2 + lmax
-		            # indices for A matrix
-		            iA1 = l1*(2*lmax+3) + m1 + lmax+1
-                	iA2 = l2*(2*lmax+3) + m2 + lmax+1
+			for m1 in range(-l1, l1+1):
+				for m2 in range(-l2, l2+1):
+					# indices for C matrix
+					i1 = (l1-1)*(2*lmax+1) + m1 + lmax
+					i2 = (l2-1)*(2*lmax+1) + m2 + lmax
+					# indices for A matrix
+					iA1 = l1*(2*lmax+3) + m1 + lmax+1
+					iA2 = l2*(2*lmax+3) + m2 + lmax+1
 
-                	lambda_p = np.sqrt((l2-m2)*(l2+m2+1))
-                	lambda_m = np.sqrt((l2+m2)*(l2-m2+1))
+					lambda_p = np.sqrt((l2-m2)*(l2+m2+1))
+					lambda_m = np.sqrt((l2+m2)*(l2-m2+1))
 		            
-		            Cx = (lambda_p*A[iA1,iA2+1] + lambda_m*A[iA1,iA2-1]) / 2
-                	Cy = (lambda_p*A[iA1,iA2+1] - lambda_m*A[iA1,iA2-1]) / (2*1j)
-                	Cz = m2*A[iA1,iA2]
-                	C[i1,i2] = K*(rho[0]*Cx + rho[1]*Cy + rho[2]*Cz)
-
+					Cx = (lambda_p*A[iA1,iA2+1] + lambda_m*A[iA1,iA2-1]) / 2
+					Cy = (lambda_p*A[iA1,iA2+1] - lambda_m*A[iA1,iA2-1]) / (2*1j)
+					Cz = m2*A[iA1,iA2]
+					C[i1,i2] = K*(rho[0]*Cx + rho[1]*Cy + rho[2]*Cz)
 	return C
 
 
@@ -260,20 +259,20 @@ def Arho_matrix(rho, lmax):
 	u_rho = eval_u1(2*lmax,rho)
 
 	for l1 in range(lmax+1): # from 0 to lmax 
-    	for l2 in range(lmax+1): # from 0 to lmax 
-        	for m1 in range(-l1, l1+1): # from -l1 to l1
-            	for m2 in range(-l2, l2+2): # from -l2 to l2
-                	i1 = l1*(2*lmax+1) + m1 + lmax
-                	i2 = l2*(2*lmax+1) + m2 + lmax
-                
-                	alpha = np.range(l1+l2+1) # from 0 to (l1+l2), size l1+l2+1
-                	a = a_coeff(l1,-m1,l2,m2) # 0<=alpha<=l1+l2
-
-                	ind = alpha*(4*lmax+1)+m2-m1+2*lmax # indices where beta=m2-m1
-                	u = u_rho(ind)
-                
-                	# sum for alpha from 0 to l1+l2
-                	A[i1,i2] = (-1)**m1*4*np.pi*1j**(l2-l1)*np.sum(1j**alpha*a*u)
+		for l2 in range(lmax+1): # from 0 to lmax 
+    		for m1 in range(-l1, l1+1): # from -l1 to l1
+				for m2 in range(-l2, l2+2): # from -l2 to l2
+					i1 = l1*(2*lmax+1) + m1 + lmax
+					i2 = l2*(2*lmax+1) + m2 + lmax
+					
+					alpha = np.range(l1+l2+1) # from 0 to (l1+l2), size l1+l2+1
+					a = a_coeff(l1,-m1,l2,m2) # 0<=alpha<=l1+l2
+					
+					ind = alpha*(4*lmax+1)+m2-m1+2*lmax # indices where beta=m2-m1
+					u = u_rho(ind)
+					
+					# sum for alpha from 0 to l1+l2
+					A[i1,i2] = (-1)**m1*4*np.pi*1j**(l2-l1)*np.sum(1j**alpha*a*u)
 	return A
 
 
