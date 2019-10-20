@@ -29,7 +29,7 @@ def matrix_Ddip(pos, alpha, lmax):
 	N = pos.shape[1] # number of particles
 	TQ = matrix_TQdip(pos, alpha, lmax) # size Nsph by 3N
 	X = matrix_Xdip(pos, alpha) # size 3N by 3N
-	FT = matrix_FTdip(pos, lmax) # size 3N by Nsph
+	FT = matrix_FTdip(pos, alpha, lmax) # size 3N by Nsph
 	D = np.dot(TQ, np.linalg.inv(np.eye(3*N) - X)).dot(FT)
 	return D # size Nsph by Nsph
 
@@ -71,10 +71,10 @@ def matrix_FTdip(pos, alpha, lmax):
 
 	# construction of the generic F matrix, size 3 by Nsph 
 	F = np.zeros((3, Nsph))
-	F[:, lmax:lmax+3] = [[1j,   0, -1j]
-						[0,    0, sqrt(2)*1j]
+	F[:, lmax:lmax+3] = [[1j,   0, -1j], 
+						[0,    0, np.sqrt(2)*1j], 
 						[-1j,  1, 0]] / np.sqrt(12*np.pi)
-	FT = np.zeros((3*n, N))
+	FT = np.zeros((3*N, Nsph))
 	for i in range(N):
 		T = translate_reduced(-pos[:,i], lmax) # size Nsph by Nsph
 		FT[i*3:(i+1)*3,:] = F*T # block of size 3 by Nsph
@@ -96,7 +96,7 @@ def matrix_TQdip(pos, alpha, lmax):
 	# construction of the generic Q matrix, size Nsph by 3 
 	Q = np.zeros((Nsph, 3))
 	Q[lmax:lmax+3,:] = [[1,  1j, 0],
-						[0,  0,  sqrt(2)],
+						[0,  0,  np.sqrt(2)],
 						[-1, 1j, 0]] / np.sqrt(12*np.pi)
     
 	TQ = np.zeros((Nsph,3*N))
@@ -119,7 +119,7 @@ def eval_green(pos1, pos2):
 	function that evaluates the Green tensor in vacuum divided by k
 	between positions 1 and 2 (3D vectors) written in units of k
 	'''
-	R = np.norm(pos1-pos2, 2) # scalar
+	R = np.linalg.norm(pos1-pos2, 2) # scalar
 	u = (pos1-pos2)/R # unit vector, dim 3 by 1
 
 	M = np.dot(u, u.T) # 3 by 3 matrix
@@ -281,6 +281,8 @@ def Arho_matrix(rho, lmax):
 # fourth level
 # ------------
 
-#def Arho_matrix
-#def eval_u1
-#def a_coeff
+def eval_u1(lmax, rho):
+	pass
+
+def a_coeff(l1, m1, l2, m2):
+	pass
