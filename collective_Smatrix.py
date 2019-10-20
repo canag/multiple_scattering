@@ -1,4 +1,5 @@
 import numpy as np
+from math import factorial as fact
 
 # first level
 # -----------
@@ -268,8 +269,9 @@ def Arho_matrix(rho, lmax):
 					alpha = np.range(l1+l2+1) # from 0 to (l1+l2), size l1+l2+1
 					a = a_coeff(l1,-m1,l2,m2) # 0<=alpha<=l1+l2
 					
-					ind = alpha*(4*lmax+1)+m2-m1+2*lmax # indices where beta=m2-m1
-					u = u_rho(ind)
+					# indices where beta=m2-m1
+					ind = alpha*(4*lmax+1)+m2-m1+2*lmax
+					u = u_rho[ind]
 					
 					# sum for alpha from 0 to l1+l2
 					A[i1,i2] = (-1)**m1*4*np.pi*1j**(l2-l1)*np.sum(1j**alpha*a*u)
@@ -278,11 +280,91 @@ def Arho_matrix(rho, lmax):
 
 # needs for fourth level: eval_u1, a_coeff
 
-# fourth level
+# fifth level
 # ------------
 
-def eval_u1(lmax, rho):
-	pass
+def eval_u1(lmax, pos):
+	'''
+	function that evaluates the spherical modes (in j) up to lmax
+	for position pos=(x,y,z)*k (scalar)
+	and return u, linevector of dim (lmax+1)*(2*lmax+1)
+	'''
+	
+	kr = np.sqrt(pos[0]**2 + pos[1]**2 + pos[2]**2)
+	costheta = pos[2]/kr
+	if (pos[0]**2+pos[1]**2)>0:
+		eiphi = (pos[0]+1j*pos[1]) / np.sqrt(pos[0]**2+pos[1]**2)
+	else: # theta=0 and phi is undetermined
+		eiphi = 1
+	
+	# when costheta=1, Plm is zero except for m=0 where it is 1
+	# hence eiphi only appears for m=0 where eiphi^m=1
+
+	u = np.zeros((lmax+1)*(2*lmax+1))
+
+	for l in range(lmax+1):
+		P = legendre(l, costheta).T
+		Y = np.zeros(2*lmax+1)
+
+		# m from -lmax to lmax
+		# only cases with m from -l to l will be computed 
+		for m in range(l+1):
+			# i = m+lmax+1
+			Klm = np.sqrt((2*l+1)*fact(l-m)/(4*np.pi*fact(l+m)))
+			Y[m+lmax] = Klm*P[m]*eiphi**m
+			Y[-m+lmax] = Klm*P[m]*eiphi**(-m)*(-1)**m
+		
+		jl = np.sqrt(np.pi/(2*kr))*besselj(l+1/2, kr) # scalar
+		u[l*(2*lmax+1):((l+1)*(2*lmax+1)+1)] = jl*Y
+
+	return u 
+
 
 def a_coeff(l1, m1, l2, m2):
-	pass
+	'''
+	function that computes the coeff a(alpha,beta) that corresponds
+	to the decomposition of the product of Y's in spherical harmonics
+	0<=alpha<=l1+l2 and beta=m1+m2
+	index i for a goes from 1 to N=l1+l2+1
+	which corresponds to alpha from 0 to l1+l2
+	'''
+
+	Nalpha = l1+l2+1
+	alpha = np.arange(Nalpha)
+	C = CG_coeff(l1, m1, l2, m2) # size l1+l2+2 for alpha from 0 to l1+l2+1
+	C0 = CG_coeff(l1, 0, l2, 0) 
+	a = np.sqrt((2*l1+1)*(2*l2+1)/(4*np.pi*(2*alpha+1)))*C[:Nalpha]*C0[:Nalpha]
+	return a
+
+
+def CG_coeff(l1, m1, l2, m2):
+	'''
+	function that derives the Clebsch-Gordan coefficients C
+	for 0<=alpha<=l1+l2+1 and beta=m1+m2
+	index i=alpha+1 for C goes from 1 to N=l1+l2+2
+	which corresponds to alpha from 0 to l1+l2+1
+	'''
+	
+	beta = m1 + m2
+	N = l1 + l2 + 2
+	C = np.zeros(N)
+
+	# alpha=l1+l2+1 (i=l1+l2+2=N)
+	C[N-1] = 0
+
+	# alpha=l1+l2 (i=l1+l2+1=N-1)
+	C[N-2] = np.sqrt(fact(l1+l2+m1+m2) * fact(l1+l2-m1-m2)
+	/(fact(l1+m1) * fact(l1-m1) * fact(l2+m2) * fact(l2-m2)))
+	*np.sqrt(fact(2*l1) * fact(2*l2) / fact(2*l1+2*l2))
+	
+	for i in range(N-2,0,-1):
+		alpha = i-1
+		if (alpha >= np.max(abs(l2-l1),abs(beta))):
+			zeta = m1 - m2 - beta*(l1*(l1+1)-l2*(l2+1))/((alpha+1)*(alpha+2))
+			xi = ((alpha+1)^2-beta^2) * ((alpha+1)^2-(l1-l2)^2) * ((l1+l2+1)^2-(alpha+1)^2)/((alpha+1)^2*(4*(alpha+1)^2-1))
+			xiplus = ((alpha+2)^2-beta^2) * ((alpha+2)^2-(l1-l2)^2) * ((l1+l2+1)^2-(alpha+2)^2)/((alpha+2)^2*(4*(alpha+2)^2-1))
+			C[i-1] = zeta/np.sqrt(xi)*C[i] - np.sqrt(xiplus/xi)*C[i+1]
+
+	return C
+
+# needs for fifth level: besselj, legendre, fact
