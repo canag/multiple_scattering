@@ -35,6 +35,8 @@ def matrix_Ddip(pos, alpha, lmax):
     return D # size Nsph by Nsph
 
 
+# needs for first level: matrix_TQdip, matrix_Xdip, matrix_FTdip
+
 # second level
 # ------------
 
@@ -52,7 +54,7 @@ def matrix_Xdip(pos, alpha):
     for i in range(N):
         for j in range(N):
             if i!=j:
-                X[3*i:3*(i+1),3*j:3*(j+1)] = alpha[j]*eval_green(pos[:,i],pos[:,j])
+                X[3*i:3*(i+1),3*j:3*(j+1)] = alpha[j] * eval_green(pos[:,i],pos[:,j])
     return X
 
 
@@ -71,14 +73,13 @@ def matrix_FTdip(pos, alpha, lmax):
 	# construction of the generic F matrix, size 3 by Nsph 
 	F = np.zeros((3, Nsph))
 	F[:, lmax:lmax+3] = [[1j,   0, -1j]
-						 [0,    0, sqrt(2)*j]
-						 [-1j, 1, 0]] / np.sqrt(12*np.pi)
+						 [0,    0, sqrt(2)*1j]
+						 [-1j,  1, 0]] / np.sqrt(12*np.pi)
 
-	FT = np.zeros((3*n,N))
+	FT = np.zeros((3*n, N))
 	for i in range(N):
-    	T = translate_reduced(-pos[:,i], lmax) # size Nsph by Nsph
-    	FT[i*3:(i+1)*3,:] = F*T # block of size 3 by Nsph
-
+		T = translate_reduced(-pos[:,i], lmax) # size Nsph by Nsph
+        FT[i*3:(i+1)*3,:] = F*T # block of size 3 by Nsph
     return FT # size 3N by Nsph
 
 
@@ -108,8 +109,25 @@ def matrix_TQdip(pos, alpha, lmax):
     return TQ # size Nsph by 3N
 
 
+# needs for second level: eval_green, translate_reduced
+
+
 # third level
 # -----------
+
+def eval_green(pos1, pos2):
+	'''
+	function that evaluates the Green tensor in vacuum divided by k
+	between positions 1 and 2 (3D vectors) written in units of k
+	'''
+	R = np.norm(pos1-pos2, 2) # scalar
+	u = (pos1-pos2)/R # unit vector, dim 3 by 1
+
+	M = np.dot(u, u.T) # 3 by 3 matrix
+	G = np.exp(1j*R) * ((R**2 + 1j*R - 1)/R**2*np.eye(3) 
+						- (R**2 + 3*1j*R - 3)/R**2*M) / (4*np.pi*R)
+	return G
+
 
 def translate_reduced(rho, lmax):
 	'''
@@ -133,6 +151,12 @@ def translate_reduced(rho, lmax):
 
 	return A
 
+
+# needs for third level: Brho_matrix, Crho_matrix
+
+
+# fourth level
+# -----------
 
 
 def Brho_matrix(rho, lmax):
@@ -171,7 +195,7 @@ def Brho_matrix(rho, lmax):
 	                u = u_rho[ind]
 
 	                # sum for alpha from 0 to l1+l2
-	                B[i1, i2] = ((-1)^m1) * 4*np.pi*1i^(l2-l1) * np.sum(1i^alpha*K_alpha*a*u)
+	                B[i1, i2] = ((-1)^m1) * 4*np.pi*1j^(l2-l1) * np.sum(1j^alpha*K_alpha*a*u)
 	            
 	return B
 
@@ -218,8 +242,6 @@ def Crho_matrix(rho, lmax):
 
 	return C
 
-
-def eval_green
 
 
 # fourth level
