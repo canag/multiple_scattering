@@ -115,6 +115,7 @@ def matrix_TQdip(pos, alpha, lmax):
 # third level
 # -----------
 
+
 def eval_green(pos1, pos2):
 	'''
 	function that evaluates the Green tensor in vacuum divided by k
@@ -138,18 +139,18 @@ def translate_reduced(rho, lmax):
 	n = lmax*(2*lmax+1)
 	Nsph = 2*n
 
-	A = np.zeros((Nsph, Nsph))
+	T = np.zeros((Nsph, Nsph))
 	if np.abs(rho)==0:
-		A = np.ones((Nsph, Nsph))
-	else
+		T = np.ones((Nsph, Nsph)) # size 2n by 2n
+	else:
 		B = Brho_matrix(rho, lmax) # size n by n
 		C = Crho_matrix(rho, lmax) # idem
-		A[:n, :n] = B
-		A[:n, n:] = 1j*C
-		A[n:, :n] = -1j*C
-		A[n:, n:] = B
+		T[:n, :n] = B
+		T[:n, n:] = 1j*C
+		T[n:, :n] = -1j*C
+		T[n:, n:] = B
 
-	return A
+	return T
 
 
 # needs for third level: Brho_matrix, Crho_matrix
@@ -243,6 +244,47 @@ def Crho_matrix(rho, lmax):
 	return C
 
 
+def Arho_matrix(rho, lmax):
+	'''
+	function that derives the matrix A that applies translations for scalar 
+	spherical modes, rho=k*(rho_x,rho_y,rho_z) is the translation vector times k
+	'''
+
+	# finite number of modes in scalar spherical modes
+	Nsca = (lmax+1)*(2*lmax+1)
+	# i = l*(2*lmax+1) + m + lmax
+	# 0<=l<=lmax and -lmax<=m<=lmax
+	A = np.zeros((Nsca, Nsca))
+
+	# spherical harmonics evaluated at rho
+	# linevector of size (2*lmax+1)*(4*lmax+1)
+	# with index i = alpha*(4*lmax+1) + beta + 2*lmax
+	u_rho = eval_u1(2*lmax,rho); 
+
+	for l1 in range(lmax+1) # from 0 to lmax 
+    	for l2 in range(lmax+1) # from 0 to lmax 
+        	for m1 in range(-l1, l1+1) # from -l1 to l1
+            	for m2 in range(-l2, l2+2) # from -l2 to l2
+                	i1 = l1*(2*lmax+1) + m1 + lmax
+                	i2 = l2*(2*lmax+1) + m2 + lmax
+                
+                	alpha = np.range(l1+l2+1) # from 0 to (l1+l2), size l1+l2+1
+                	a = a_coeff(l1,-m1,l2,m2) # 0<=alpha<=l1+l2
+
+                	ind = alpha*(4*lmax+1)+m2-m1+2*lmax # indices where beta=m2-m1
+                	u = u_rho(ind)
+                
+                	# sum for alpha from 0 to l1+l2
+                	A[i1,i2] = (-1)**m1*4*np.pi*1j**(l2-l1)*np.sum(1j**alpha*a*u)
+            	end # m2
+        	end # m1
+    	end # l2
+	end # l1
+
+end
+
+
+# needs for fourth level: eval_u1, a_coeff
 
 # fourth level
 # ------------
