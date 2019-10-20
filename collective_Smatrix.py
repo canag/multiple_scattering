@@ -259,12 +259,12 @@ def Arho_matrix(rho, lmax):
 	# spherical harmonics evaluated at rho
 	# linevector of size (2*lmax+1)*(4*lmax+1)
 	# with index i = alpha*(4*lmax+1) + beta + 2*lmax
-	u_rho = eval_u1(2*lmax,rho); 
+	u_rho = eval_u1(2*lmax,rho)
 
-	for l1 in range(lmax+1) # from 0 to lmax 
-    	for l2 in range(lmax+1) # from 0 to lmax 
-        	for m1 in range(-l1, l1+1) # from -l1 to l1
-            	for m2 in range(-l2, l2+2) # from -l2 to l2
+	for l1 in range(lmax+1): # from 0 to lmax 
+    	for l2 in range(lmax+1): # from 0 to lmax 
+        	for m1 in range(-l1, l1+1): # from -l1 to l1
+            	for m2 in range(-l2, l2+2): # from -l2 to l2
                 	i1 = l1*(2*lmax+1) + m1 + lmax
                 	i2 = l2*(2*lmax+1) + m2 + lmax
                 
@@ -276,12 +276,7 @@ def Arho_matrix(rho, lmax):
                 
                 	# sum for alpha from 0 to l1+l2
                 	A[i1,i2] = (-1)**m1*4*np.pi*1j**(l2-l1)*np.sum(1j**alpha*a*u)
-            	end # m2
-        	end # m1
-    	end # l2
-	end # l1
-
-end
+	return A
 
 
 # needs for fourth level: eval_u1, a_coeff
