@@ -1,5 +1,6 @@
 import numpy as np
 from math import factorial as fact
+from scipy.special import jv
 
 # first level
 # -----------
@@ -314,7 +315,7 @@ def eval_u1(lmax, pos):
 			Y[m+lmax] = Klm*P[m]*eiphi**m
 			Y[-m+lmax] = Klm*P[m]*eiphi**(-m)*(-1)**m
 		
-		jl = np.sqrt(np.pi/(2*kr))*besselj(l+1/2, kr) # scalar
+		jl = np.sqrt(np.pi/(2*kr))*jv(l+1/2, kr) # scalar
 		u[l*(2*lmax+1):((l+1)*(2*lmax+1)+1)] = jl*Y
 
 	return u 
