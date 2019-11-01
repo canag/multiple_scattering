@@ -342,8 +342,7 @@ def CG_coeff(l1, m1, l2, m2):
 	'''
 	function that derives the Clebsch-Gordan coefficients C
 	for 0<=alpha<=l1+l2+1 and beta=m1+m2
-	index i=alpha+1 for C goes from 1 to N=l1+l2+2
-	which corresponds to alpha from 0 to l1+l2+1
+	and returns a numpy vector of size l1+l2+2
 	'''
 	
 	beta = m1 + m2
