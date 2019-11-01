@@ -287,8 +287,9 @@ def Arho_matrix(rho, lmax):
 def eval_u1(lmax, pos):
 	'''
 	function that evaluates the spherical modes (in j) up to lmax
-	for position pos=(x,y,z)*k (scalar)
-	and return u, linevector of dim (lmax+1)*(2*lmax+1)
+	for position pos=(x,y,z)*k (scalar quantity)
+	and return u, numpy vector of size (lmax+1)*(2*lmax+1)
+	for 0 <= l <= lmax and -l <= m <= l 
 	'''
 	
 	kr = np.sqrt(pos[0]**2 + pos[1]**2 + pos[2]**2)
@@ -303,20 +304,21 @@ def eval_u1(lmax, pos):
 
 	u = np.zeros((lmax+1)*(2*lmax+1))
 
-	for l in range(lmax+1):
-		P = legendre(l, costheta).T
+	for l in range(lmax+1): # 0<=l<=lmax
+		# computes for all values 0<=m<=l
+		P = legendre(l, costheta).T  # size l+1
 		Y = np.zeros(2*lmax+1)
 
 		# m from -lmax to lmax
 		# only cases with m from -l to l will be computed 
-		for m in range(l+1):
+		for m in range(l+1): # 0<=m<=l
 			# i = m+lmax+1
 			Klm = np.sqrt((2*l+1)*fact(l-m)/(4*np.pi*fact(l+m)))
-			Y[m+lmax] = Klm*P[m]*eiphi**m
-			Y[-m+lmax] = Klm*P[m]*eiphi**(-m)*(-1)**m
+			Y[m+lmax] = Klm * P[m] * eiphi**m
+			Y[-m+lmax] = Klm * P[m] * eiphi**(-m) * (-1)**m
 		
 		jl = np.sqrt(np.pi/(2*kr))*jv(l+1/2, kr) # scalar
-		u[l*(2*lmax+1):((l+1)*(2*lmax+1)+1)] = jl*Y
+		u[l*(2*lmax+1):((l+1)*(2*lmax+1))] = jl*Y # size 2*lmax+1
 
 	return u 
 
