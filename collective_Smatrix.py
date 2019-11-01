@@ -326,15 +326,15 @@ def a_coeff(l1, m1, l2, m2):
 	function that computes the coeff a(alpha,beta) that corresponds
 	to the decomposition of the product of Y's in spherical harmonics
 	0<=alpha<=l1+l2 and beta=m1+m2
-	index i for a goes from 1 to N=l1+l2+1
-	which corresponds to alpha from 0 to l1+l2
+	and returns a numpy vector of size l1+l2+1
 	'''
 
-	Nalpha = l1+l2+1
-	alpha = np.arange(Nalpha)
+	N_alpha = l1+l2+1
+	alpha = np.arange(N_alpha)
 	C = CG_coeff(l1, m1, l2, m2) # size l1+l2+2 for alpha from 0 to l1+l2+1
-	C0 = CG_coeff(l1, 0, l2, 0) 
-	a = np.sqrt((2*l1+1)*(2*l2+1)/(4*np.pi*(2*alpha+1)))*C[:Nalpha]*C0[:Nalpha]
+	C0 = CG_coeff(l1, 0, l2, 0) # idem
+	# only uses values of alpha from 0 to l1+l2 (not the last one)
+	a = np.sqrt((2*l1+1)*(2*l2+1)/(4*np.pi*(2*alpha+1))) * C[:N_alpha] * C0[:N_alpha]
 	return a
 
 
