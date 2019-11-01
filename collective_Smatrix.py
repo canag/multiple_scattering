@@ -349,22 +349,22 @@ def CG_coeff(l1, m1, l2, m2):
 	N = l1 + l2 + 2
 	C = np.zeros(N)
 
-	# alpha=l1+l2+1 (i=l1+l2+2=N)
-	C[N-1] = 0
+	alpha=l1+l2+1 # (=N-1, and i=l1+l2+2=N)
+	C[alpha] = 0
 
-	# alpha=l1+l2 (i=l1+l2+1=N-1)
-	C[N-2] = np.sqrt(fact(l1+l2+m1+m2) * fact(l1+l2-m1-m2)
+	alpha = l1+l2 # (=N-2, and i=l1+l2+1=N-1)
+	C[alpha] = np.sqrt(fact(l1+l2+m1+m2) * fact(l1+l2-m1-m2)
 	/(fact(l1+m1) * fact(l1-m1) * fact(l2+m2) * fact(l2-m2)))
 	*np.sqrt(fact(2*l1) * fact(2*l2) / fact(2*l1+2*l2))
 	
-	for i in range(N-2,0,-1):
-		alpha = i-1
+	for alpha in range(N-3,-1,-1):
 		if (alpha >= np.max(abs(l2-l1),abs(beta))):
 			zeta = m1 - m2 - beta*(l1*(l1+1)-l2*(l2+1))/((alpha+1)*(alpha+2))
 			xi = ((alpha+1)^2-beta^2) * ((alpha+1)^2-(l1-l2)^2) * ((l1+l2+1)^2-(alpha+1)^2)/((alpha+1)^2*(4*(alpha+1)^2-1))
 			xiplus = ((alpha+2)^2-beta^2) * ((alpha+2)^2-(l1-l2)^2) * ((l1+l2+1)^2-(alpha+2)^2)/((alpha+2)^2*(4*(alpha+2)^2-1))
-			C[i-1] = zeta/np.sqrt(xi)*C[i] - np.sqrt(xiplus/xi)*C[i+1]
+			C[alpha] = zeta/np.sqrt(xi)*C[alpha+1] - np.sqrt(xiplus/xi)*C[alpha+2]
 
 	return C
 
 # needs for fifth level: besselj, legendre, fact
+# remains to solve for legendre
