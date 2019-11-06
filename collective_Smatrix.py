@@ -1,6 +1,7 @@
 import numpy as np
 from math import factorial as fact
 from scipy.special import jv
+from scipy.special import lpmv
 
 # first level
 # -----------
@@ -306,7 +307,9 @@ def eval_u1(lmax, pos):
 
 	for l in range(lmax+1): # 0<=l<=lmax
 		# computes for all values 0<=m<=l
-		P = legendre(l, costheta).T  # size l+1
+		P = np.zeros(l+1)
+		for m in range(l+1):
+			P[m] = lpmv(m, l , costheta)	
 		Y = np.zeros(2*lmax+1)
 
 		# m from -lmax to lmax
