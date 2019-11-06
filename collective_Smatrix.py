@@ -259,7 +259,7 @@ def Arho_matrix(rho, lmax):
 	# spherical harmonics evaluated at rho
 	# linevector of size (2*lmax+1)*(4*lmax+1)
 	# with index i = alpha*(4*lmax+1) + beta + 2*lmax
-	u_rho = eval_u1(2*lmax,rho)
+	u_rho = eval_u1(2*lmax, rho)
 
 	for l1 in range(lmax+1): # from 0 to lmax 
 		for l2 in range(lmax+1): # from 0 to lmax
@@ -268,15 +268,15 @@ def Arho_matrix(rho, lmax):
 					i1 = l1*(2*lmax+1) + m1 + lmax
 					i2 = l2*(2*lmax+1) + m2 + lmax
 					
-					alpha = np.range(l1+l2+1) # from 0 to (l1+l2), size l1+l2+1
-					a = a_coeff(l1,-m1,l2,m2) # 0<=alpha<=l1+l2
+					alpha = np.arange(l1+l2+1) # from 0 to (l1+l2), size l1+l2+1
+					a = a_coeff(l1, -m1, l2, m2) # 0<=alpha<=l1+l2
 					
 					# indices where beta=m2-m1
 					ind = alpha*(4*lmax+1)+m2-m1+2*lmax
 					u = u_rho[ind]
 					
 					# sum for alpha from 0 to l1+l2
-					A[i1,i2] = (-1)**m1*4*np.pi*1j**(l2-l1)*np.sum(1j**alpha*a*u)
+					A[i1,i2] = (-1)**m1 * 4*np.pi*1j**(l2-l1) * np.sum(1j**alpha*a*u)
 	return A
 
 
@@ -303,14 +303,14 @@ def eval_u1(lmax, pos):
 	# when costheta=1, Plm is zero except for m=0 where it is 1
 	# hence eiphi only appears for m=0 where eiphi^m=1
 
-	u = np.zeros((lmax+1)*(2*lmax+1))
+	u = np.zeros((lmax+1)*(2*lmax+1), dtype=np.complex_)
 
 	for l in range(lmax+1): # 0<=l<=lmax
 		# computes for all values 0<=m<=l
 		P = np.zeros(l+1)
 		for m in range(l+1):
 			P[m] = lpmv(m, l , costheta)	
-		Y = np.zeros(2*lmax+1)
+		Y = np.zeros(2*lmax+1, dtype=np.complex_)
 
 		# m from -lmax to lmax
 		# only cases with m from -l to l will be computed 
@@ -368,6 +368,3 @@ def CG_coeff(l1, m1, l2, m2):
 			C[alpha] = zeta/np.sqrt(xi)*C[alpha+1] - np.sqrt(xiplus/xi)*C[alpha+2]
 
 	return C
-
-# needs for fifth level: besselj, legendre, fact
-# remains to solve for legendre
