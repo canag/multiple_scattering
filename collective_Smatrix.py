@@ -140,9 +140,9 @@ def translate_reduced(rho, lmax):
 	n = lmax*(2*lmax+1)
 	Nsph = 2*n
 
-	T = np.zeros((Nsph, Nsph))
-	if np.abs(rho)==0:
-		T = np.ones((Nsph, Nsph)) # size 2n by 2n
+	T = np.zeros((Nsph, Nsph), dtype=np.complex_)
+	if np.linalg.norm(rho)==0:
+		T = T + np.ones((Nsph, Nsph)) # size 2n by 2n
 	else:
 		B = Brho_matrix(rho, lmax) # size n by n
 		C = Crho_matrix(rho, lmax) # idem
