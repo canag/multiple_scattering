@@ -120,12 +120,13 @@ def matrix_TQdip(pos, alpha, lmax):
 def eval_green(pos1, pos2):
 	'''
 	function that evaluates the Green tensor in vacuum divided by k
-	between positions 1 and 2 (3D vectors) written in units of k
+	between positions 1 and 2 (numpy vectors of size 3) written in units of k
+	returns a 3 by 3 complex matrix
 	'''
 	R = np.linalg.norm(pos1-pos2, 2) # scalar
 	u = (pos1-pos2)/R # unit vector, dim 3 by 1
 
-	M = np.dot(u, u.T) # 3 by 3 matrix
+	M = np.dot(u.reshape(-1,1), u.reshape(1, -1)) # 3 by 3 matrix
 	G = np.exp(1j*R) * ((R**2 + 1j*R - 1)/R**2*np.eye(3)
 						- (R**2 + 3*1j*R - 3)/R**2*M) / (4*np.pi*R)
 	return G
