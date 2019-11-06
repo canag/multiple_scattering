@@ -213,7 +213,7 @@ def Crho_matrix(rho, lmax):
 	n = lmax*(2*lmax+1)
 	# indexing for both l and m: i = (l-1)*(2*lmax+1)+m+lmax
 	# 1<=l<=lmax and -lmax<=m<=lmax gives i in [0,n-1]
-	C = np.zeros((n, n))
+	C = np.zeros((n, n), dtype=np.complex_)
 
 	# square matrix of size (lmax+2)*(2*lmax+3) by (lmax+2)*(2*lmax+3)
 	# where l from 0 to lmax+1
