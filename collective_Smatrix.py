@@ -172,7 +172,7 @@ def Brho_matrix(rho, lmax):
 	n = lmax*(2*lmax+1)
 	# indexing for both l and m: i = (l-1)*(2*lmax+1)+m+lmax
 	# 1<=l<=lmax and -lmax<=m<=lmax gives i in [0,n-1]
-	B = np.zeros(n, n)
+	B = np.zeros((n, n), dtype=np.complex_)
 
 	# scalar spherical harmonics evaluated at rho
 	# linevector of size n_u = (2*lmax+1)*(4*lmax+1)
@@ -197,7 +197,7 @@ def Brho_matrix(rho, lmax):
 	                u = u_rho[ind]
 
 	                # sum for alpha from 0 to l1+l2
-	                B[i1, i2] = ((-1)^m1) * 4*np.pi*1j^(l2-l1) * np.sum(1j^alpha*K_alpha*a*u)
+	                B[i1, i2] = ((-1)**m1) * 4*np.pi*1j**(l2-l1) * np.sum(1j**alpha*K_alpha*a*u)
 	            
 	return B
 
