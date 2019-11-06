@@ -202,7 +202,6 @@ def Brho_matrix(rho, lmax):
 	return B
 
 
-
 def Crho_matrix(rho, lmax):
 	''' 
 	derives the matrix C that applies translations for vectorial spherical modes
@@ -254,7 +253,7 @@ def Arho_matrix(rho, lmax):
 	Nsca = (lmax+1)*(2*lmax+1)
 	# i = l*(2*lmax+1) + m + lmax
 	# 0<=l<=lmax and -lmax<=m<=lmax
-	A = np.zeros((Nsca, Nsca))
+	A = np.zeros((Nsca, Nsca), dtype=np.complex_)
 
 	# spherical harmonics evaluated at rho
 	# linevector of size (2*lmax+1)*(4*lmax+1)
@@ -264,7 +263,7 @@ def Arho_matrix(rho, lmax):
 	for l1 in range(lmax+1): # from 0 to lmax 
 		for l2 in range(lmax+1): # from 0 to lmax
 			for m1 in range(-l1, l1+1): # from -l1 to l1
-				for m2 in range(-l2, l2+2): # from -l2 to l2
+				for m2 in range(-l2, l2+1): # from -l2 to l2
 					i1 = l1*(2*lmax+1) + m1 + lmax
 					i2 = l2*(2*lmax+1) + m2 + lmax
 					
@@ -289,7 +288,7 @@ def eval_u1(lmax, pos):
 	'''
 	function that evaluates the spherical modes (in j) up to lmax
 	for position pos=(x,y,z)*k (scalar quantity)
-	and return u, numpy vector of size (lmax+1)*(2*lmax+1)
+	and return u, numpy complex vector of size (lmax+1)*(2*lmax+1)
 	for 0 <= l <= lmax and -l <= m <= l 
 	'''
 	
