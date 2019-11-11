@@ -1,7 +1,6 @@
 import numpy as np
 from math import factorial as fact
-from scipy.special import jv
-from scipy.special import lpmv
+from scipy.special import jv, lpmv
 
 # first level
 # -----------
@@ -15,9 +14,12 @@ def matrix_Sdip(pos, alpha, lmax):
 	pos has size (3,N) and alpha has size N
 	alpha must be already multiplied by k^3 to be adimensional
 	'''
+
+	Nsph = 2*lmax*(2*lmax+1)
+
 	N = pos.shape[1] # number of particles
 	D = matrix_Ddip(pos, alpha, lmax)
-	S = np.eye(3*N) + 2*D
+	S = np.eye(Nsph) + 2*D
 	return S
 
 
