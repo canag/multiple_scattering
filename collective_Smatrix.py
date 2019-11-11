@@ -95,17 +95,21 @@ def matrix_TQdip(pos, alpha, lmax):
 
 	N = pos.shape[1] # number of particles
 	Nsph = 2*lmax*(2*lmax+1) # number os spherical modes (with reduced notation)
+	# l from 1 to lmax and m from -l to l (-> -lmax, +lmax)
+	# i = (l-1)*(2*lmax+1)+m+lmax
 
 	# construction of the generic Q matrix, size Nsph by 3 
-	Q = np.zeros((Nsph, 3))
-	Q[lmax:lmax+3,:] = [[1,  1j, 0],
-						[0,  0,  np.sqrt(2)],
-						[-1, 1j, 0]] / np.sqrt(12*np.pi)
+	Q = np.zeros((Nsph, 3), dtype=np.complex_)
+	# only non-zero rows are Alm with l=1 m from -1 to 1
+	# then i from lmax-1 to lmax+1 (included)
+	Q[(lmax-1):lmax+2,:] = [[1,  1j, 0],
+							[0,  0,  np.sqrt(2)],
+							[-1, 1j, 0]] / np.sqrt(12*np.pi)
     
-	TQ = np.zeros((Nsph,3*N))
+	TQ = np.zeros((Nsph,3*N), dtype=np.complex_)
 	for i in range(N):
 		T = translate_reduced(pos[:,i], lmax) # size Nsph by Nsph
-		TQ[:,i*3:(i+1)*3] = alpha[i]*T*Q # size Nsph by 3
+		TQ[:,(i*3):((i+1)*3)] = alpha[i]*np.dot(T,Q) # size Nsph by 3
 
 	return TQ # size Nsph by 3N
 
