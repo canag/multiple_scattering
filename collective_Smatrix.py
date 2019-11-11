@@ -52,11 +52,11 @@ def matrix_Xdip(pos, alpha):
 	'''
 
 	N = pos.shape[1] # number of particles
-	X = np.zeros((3*N, 3*N))
+	X = np.zeros((3*N, 3*N),  dtype=np.complex_)
 	for i in range(N):
 		for j in range(N):
 			if i!=j:
-				X[3*i:3*(i+1),3*j:3*(j+1)] = alpha[j] * eval_green(pos[:,i],pos[:,j])
+				X[(3*i):(3*(i+1)),(3*j):(3*(j+1))] = alpha[j] * eval_green(pos[:,i],pos[:,j])
 	return X
 
 
