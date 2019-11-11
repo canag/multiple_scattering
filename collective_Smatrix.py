@@ -71,16 +71,21 @@ def matrix_FTdip(pos, alpha, lmax):
 
 	N = pos.shape[1] # number of particles
 	Nsph = 2*lmax*(2*lmax+1) # number os spherical modes (with reduced notation)
+	# l from 1 to lmax and m from -l to l (-> -lmax, +lmax)
+	# i = (l-1)*(2*lmax+1)+m+lmax
 
 	# construction of the generic F matrix, size 3 by Nsph 
-	F = np.zeros((3, Nsph))
-	F[:, lmax:lmax+3] = [[1j,   0, -1j], 
-						[0,    0, np.sqrt(2)*1j], 
-						[-1j,  1, 0]] / np.sqrt(12*np.pi)
-	FT = np.zeros((3*N, Nsph))
+	F = np.zeros((3, Nsph), dtype=np.complex_)
+	# only non-zero rows are Alm with l=1 m from -1 to 1
+	# then i from lmax-1 to lmax+1 (included)
+	F[:, (lmax-1):(lmax+2)] = [[1j,   0, -1j], 
+							   [1,    0, 1], 
+							   [0,  1j*np.sqrt(2), 0]] / np.sqrt(12*np.pi)
+
+	FT = np.zeros((3*N, Nsph), dtype=np.complex_)
 	for i in range(N):
 		T = translate_reduced(-pos[:,i], lmax) # size Nsph by Nsph
-		FT[i*3:(i+1)*3,:] = F*T # block of size 3 by Nsph
+		FT[(i*3):((i+1)*3),:] = np.dot(F,T) # block of size 3 by Nsph
 	return FT # size 3N by Nsph
 
 
@@ -102,7 +107,7 @@ def matrix_TQdip(pos, alpha, lmax):
 	Q = np.zeros((Nsph, 3), dtype=np.complex_)
 	# only non-zero rows are Alm with l=1 m from -1 to 1
 	# then i from lmax-1 to lmax+1 (included)
-	Q[(lmax-1):lmax+2,:] = [[1,  1j, 0],
+	Q[(lmax-1):(lmax+2),:] = [[1,  1j, 0],
 							[0,  0,  np.sqrt(2)],
 							[-1, 1j, 0]] / np.sqrt(12*np.pi)
     
