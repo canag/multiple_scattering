@@ -197,124 +197,125 @@ def translate_reduced(rho, lmax):
 
 
 def Brho_matrix(rho, lmax):
-	''' 
-	derives the matrix B that applies translations for vectorial spherical modes
-	B is the diagonal block (M to M and N to N) of size n by n where n = Nsph/2
-	rho=k*(rho_x,rho_y,rho_z) is the translation vector times k
-	'''
+    ''' 
+    derives the matrix B that applies translations for vectorial spherical modes
+    B is the diagonal block (M to M and N to N) of size n by n where n = Nsph/2
+    rho=k*(rho_x,rho_y,rho_z) is the translation vector times k
+    '''
 
-	# finite number of modes in vectorial spherical modes
-	n = lmax*(2*lmax+1)
-	# indexing for both l and m: i = (l-1)*(2*lmax+1)+m+lmax
-	# 1<=l<=lmax and -lmax<=m<=lmax gives i in [0,n-1]
-	B = np.zeros((n, n), dtype=np.complex_)
+    # finite number of modes in vectorial spherical modes
+    n = lmax*(2*lmax+1)
+    # indexing for both l and m: i = (l-1)*(2*lmax+1)+m+lmax
+    # 1<=l<=lmax and -lmax<=m<=lmax gives i in [0,n-1]
+    B = np.zeros((n, n), dtype=np.complex_)
 
-	# scalar spherical harmonics evaluated at rho
-	# linevector of size n_u = (2*lmax+1)*(4*lmax+1)
-	# with index ind = alpha*(4*lmax+1)+beta+2*lmax
-	# where alpha from 0 to 2*lmax
-	# and beta from -2*lmax to +2*lmax
-	# gives ind from 0 to n_u-1
-	u_rho = eval_u1(2*lmax, rho) 
+    # scalar spherical harmonics evaluated at rho
+    # linevector of size n_u = (2*lmax+1)*(4*lmax+1)
+    # with index ind = alpha*(4*lmax+1)+beta+2*lmax
+    # where alpha from 0 to 2*lmax
+    # and beta from -2*lmax to +2*lmax
+    # gives ind from 0 to n_u-1
+    u_rho = eval_u1(2*lmax, rho) 
 
-	for l1 in range(1, lmax+1):
-	    for l2 in range(1, lmax+1):
-	        for m1 in range(-l1, l1+1):
-	            for m2 in range(-l2, l2+1):
-	                i1 = (l1-1)*(2*lmax+1) + m1 + lmax
-	                i2 = (l2-1)*(2*lmax+1) + m2 + lmax
-	                
-	                alpha = np.arange(0, l1+l2+1) # size l1+l2+1
-	                a = a_coeff(l1,-m1,l2,m2) # 0<=alpha<=l1+l2, size l1+l2+1
-	                K_alpha = (l1*(l1+1)+l2*(l2+1)-alpha*(alpha+1)) / (2*np.sqrt(l1*(l1+1)*l2*(l2+1)))
+    for l1 in range(1, lmax+1):
+        for l2 in range(1, lmax+1):
+            for m1 in range(-l1, l1+1):
+                for m2 in range(-l2, l2+1):
+                    i1 = (l1-1)*(2*lmax+1) + m1 + lmax
+                    i2 = (l2-1)*(2*lmax+1) + m2 + lmax
 
-	                ind = alpha*(4*lmax+1)+m2-m1+2*lmax # indices where beta=m2-m1
-	                u = u_rho[ind]
+                    alpha = np.arange(0, l1+l2+1) # size l1+l2+1
+                    a = a_coeff(l1,-m1,l2,m2) # 0<=alpha<=l1+l2, size l1+l2+1
+                    K_alpha = (l1*(l1+1)+l2*(l2+1)-alpha*(alpha+1)) / (2*np.sqrt(l1*(l1+1)*l2*(l2+1)))
 
-	                # sum for alpha from 0 to l1+l2
-	                B[i1, i2] = ((-1)**m1) * 4*np.pi*1j**(l2-l1) * np.sum(1j**alpha*K_alpha*a*u)
-	            
-	return B
+                    ind = alpha*(4*lmax+1)+m2-m1+2*lmax # indices where beta=m2-m1
+                    u = u_rho[ind]
+
+                    # sum for alpha from 0 to l1+l2
+                    B[i1, i2] = ((-1)**m1) * 4*np.pi*1j**(l2-l1) * np.sum(1j**alpha*K_alpha*a*u)
+
+    return B
 
 
 def Crho_matrix(rho, lmax):
-	''' 
-	derives the matrix C that applies translations for vectorial spherical modes
-	C is the non-diagonal block (M to N and N to M) of size n by n where n = Nsph/2
-	rho=k*(rho_x,rho_y,rho_z) is the translation vector times k
-	'''
+    ''' 
+    derives the matrix C that applies translations for vectorial spherical modes
+    C is the non-diagonal block (M to N and N to M) of size n by n where n = Nsph/2
+    rho=k*(rho_x,rho_y,rho_z) is the translation vector times k
+    '''
 
-	# finite number of modes in vectorial spherical modes
-	n = lmax*(2*lmax+1)
-	# indexing for both l and m: i = (l-1)*(2*lmax+1)+m+lmax
-	# 1<=l<=lmax and -lmax<=m<=lmax gives i in [0,n-1]
-	C = np.zeros((n, n), dtype=np.complex_)
+    # finite number of modes in vectorial spherical modes
+    n = lmax*(2*lmax+1)
+    # indexing for both l and m: i = (l-1)*(2*lmax+1)+m+lmax
+    # 1<=l<=lmax and -lmax<=m<=lmax gives i in [0,n-1]
+    C = np.zeros((n, n), dtype=np.complex_)
 
-	# square matrix of size (lmax+2)*(2*lmax+3) by (lmax+2)*(2*lmax+3)
-	# where l from 0 to lmax+1
-	# and m from -(lmax+1) to +(lmax+1)
-	# with a corresponding indexing is iA = l*(2*lmax+3)+m+lmax+1
-	A = Arho_matrix(rho, lmax+1) # size (lmax+2)*(2*lmax+3) by (lmax+2)*(2*lmax+3)
+    # square matrix of size (lmax+2)*(2*lmax+3) by (lmax+2)*(2*lmax+3)
+    # where l from 0 to lmax+1
+    # and m from -(lmax+1) to +(lmax+1)
+    # with a corresponding indexing is iA = l*(2*lmax+3)+m+lmax+1
+    A = Arho_matrix(rho, lmax+1) # size (lmax+2)*(2*lmax+3) by (lmax+2)*(2*lmax+3)
 
-	for l1 in range(1, lmax+1):
-		for l2 in range(1, lmax+1):
-			K = -1j/np.sqrt(l1*(l1+1)*l2*(l2+1)) # scalar
-			for m1 in range(-l1, l1+1):
-				for m2 in range(-l2, l2+1):
-					# indices for C matrix
-					i1 = (l1-1)*(2*lmax+1) + m1 + lmax
-					i2 = (l2-1)*(2*lmax+1) + m2 + lmax
-					# indices for A matrix
-					iA1 = l1*(2*lmax+3) + m1 + lmax+1
-					iA2 = l2*(2*lmax+3) + m2 + lmax+1
+    for l1 in range(1, lmax+1):
+        for l2 in range(1, lmax+1):
+            K = -1j/np.sqrt(l1*(l1+1)*l2*(l2+1)) # scalar
+            for m1 in range(-l1, l1+1):
+                for m2 in range(-l2, l2+1):
+                    # indices for C matrix
+                    i1 = (l1-1)*(2*lmax+1) + m1 + lmax
+                    i2 = (l2-1)*(2*lmax+1) + m2 + lmax
+                    # indices for A matrix
+                    iA1 = l1*(2*lmax+3) + m1 + lmax+1
+                    iA2 = l2*(2*lmax+3) + m2 + lmax+1
 
-					lambda_p = np.sqrt((l2-m2)*(l2+m2+1))
-					lambda_m = np.sqrt((l2+m2)*(l2-m2+1))
-		            
-					Cx = (lambda_p*A[iA1,iA2+1] + lambda_m*A[iA1,iA2-1]) / 2
-					Cy = (lambda_p*A[iA1,iA2+1] - lambda_m*A[iA1,iA2-1]) / (2*1j)
-					Cz = m2*A[iA1,iA2]
-					C[i1,i2] = K*(rho[0]*Cx + rho[1]*Cy + rho[2]*Cz)
-	return C
+                    lambda_p = np.sqrt((l2-m2)*(l2+m2+1))
+                    lambda_m = np.sqrt((l2+m2)*(l2-m2+1))
+                    
+                    Cx = (lambda_p*A[iA1,iA2+1] + lambda_m*A[iA1,iA2-1]) / 2
+                    Cy = (lambda_p*A[iA1,iA2+1] - lambda_m*A[iA1,iA2-1]) / (2*1j)
+                    Cz = m2*A[iA1,iA2]
+                    C[i1,i2] = K*(rho[0]*Cx + rho[1]*Cy + rho[2]*Cz)
+    return C
 
 
 def Arho_matrix(rho, lmax):
-	'''
-	function that derives the matrix A that applies translations for scalar 
-	spherical modes, rho=k*(rho_x,rho_y,rho_z) is the translation vector times k
-	'''
+    '''
+    function that derives the matrix A that applies translations for scalar 
+    spherical modes, rho=k*(rho_x,rho_y,rho_z) is the translation vector times k
+    '''
 
-	# finite number of modes in scalar spherical modes
-	Nsca = (lmax+1)*(2*lmax+1)
-	# i = l*(2*lmax+1) + m + lmax
-	# 0<=l<=lmax and -lmax<=m<=lmax
-	A = np.zeros((Nsca, Nsca), dtype=np.complex_)
+    # finite number of modes in scalar spherical modes
+    Nsca = (lmax+1)*(2*lmax+1)
+    # i = l*(2*lmax+1) + m + lmax
+    # 0<=l<=lmax and -lmax<=m<=lmax
+    A = np.zeros((Nsca, Nsca), dtype=np.complex_)
+    
+    # spherical harmonics evaluated at rho
+    # linevector of size (2*lmax+1)*(4*lmax+1)
+    # with index i = alpha*(4*lmax+1) + beta + 2*lmax
+    u_rho = eval_u1(2*lmax, rho)
 
-	# spherical harmonics evaluated at rho
-	# linevector of size (2*lmax+1)*(4*lmax+1)
-	# with index i = alpha*(4*lmax+1) + beta + 2*lmax
-	u_rho = eval_u1(2*lmax, rho)
+    for l1 in range(lmax+1): # from 0 to lmax 
+        for l2 in range(lmax+1): # from 0 to lmax
+            for m1 in range(-l1, l1+1): # from -l1 to l1
+                for m2 in range(-l2, l2+1): # from -l2 to l2
+                    i1 = l1*(2*lmax+1) + m1 + lmax
+                    i2 = l2*(2*lmax+1) + m2 + lmax
+                    
+                    alpha = np.arange(l1+l2+1) # from 0 to (l1+l2), size l1+l2+1
+                    a = a_coeff(l1, -m1, l2, m2) # 0<=alpha<=l1+l2
 
-	for l1 in range(lmax+1): # from 0 to lmax 
-		for l2 in range(lmax+1): # from 0 to lmax
-			for m1 in range(-l1, l1+1): # from -l1 to l1
-				for m2 in range(-l2, l2+1): # from -l2 to l2
-					i1 = l1*(2*lmax+1) + m1 + lmax
-					i2 = l2*(2*lmax+1) + m2 + lmax
-					
-					alpha = np.arange(l1+l2+1) # from 0 to (l1+l2), size l1+l2+1
-					a = a_coeff(l1, -m1, l2, m2) # 0<=alpha<=l1+l2
-					
-					# indices where beta=m2-m1
-					ind = alpha*(4*lmax+1)+m2-m1+2*lmax
-					u = u_rho[ind]
-					
-					# sum for alpha from 0 to l1+l2
-					A[i1,i2] = (-1)**m1 * 4*np.pi*1j**(l2-l1) * np.sum(1j**alpha*a*u)
-	return A
+                    # indices where beta=m2-m1
+                    ind = alpha*(4*lmax+1)+m2-m1+2*lmax
+                    u = u_rho[ind]
+                    
+                    # sum for alpha from 0 to l1+l2
+                    A[i1,i2] = (-1)**m1 * 4*np.pi*1j**(l2-l1) * np.sum(1j**alpha*a*u)
+    return A
 
 
-# needs for fourth level: eval_u1, a_coeff
+### subfunctions needed for fourth level: eval_u1, a_coeff
+
 
 # fifth level
 # ------------
