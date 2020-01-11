@@ -320,86 +320,94 @@ def Arho_matrix(rho, lmax):
 # fifth level
 # ------------
 
+
 def eval_u1(lmax, pos):
-	'''
-	function that evaluates the spherical modes (in j) up to lmax
-	for position pos=(x,y,z)*k (scalar quantity)
-	and return u, numpy complex vector of size (lmax+1)*(2*lmax+1)
-	for 0 <= l <= lmax and -l <= m <= l 
-	'''
-	
-	kr = np.sqrt(pos[0]**2 + pos[1]**2 + pos[2]**2)
-	costheta = pos[2]/kr
-	if (pos[0]**2+pos[1]**2)>0:
-		eiphi = (pos[0]+1j*pos[1]) / np.sqrt(pos[0]**2+pos[1]**2)
-	else: # theta=0 and phi is undetermined
-		eiphi = 1
-	
-	# when costheta=1, Plm is zero except for m=0 where it is 1
-	# hence eiphi only appears for m=0 where eiphi^m=1
+    '''
+    function that evaluates the spherical modes (in j) up to lmax
+    for position pos=(x,y,z)*k (scalar quantity)
+    and return u, numpy complex vector of size (lmax+1)*(2*lmax+1)
+    for 0 <= l <= lmax and -l <= m <= l 
+    '''
 
-	u = np.zeros((lmax+1)*(2*lmax+1), dtype=np.complex_)
+    kr = np.sqrt(pos[0]**2 + pos[1]**2 + pos[2]**2)
+    costheta = pos[2]/kr
+    if (pos[0]**2+pos[1]**2)>0:
+        eiphi = (pos[0]+1j*pos[1]) / np.sqrt(pos[0]**2+pos[1]**2)
+    else: # theta=0 and phi is undetermined
+        eiphi = 1
 
-	for l in range(lmax+1): # 0<=l<=lmax
-		# computes for all values 0<=m<=l
-		P = np.zeros(l+1)
-		for m in range(l+1):
-			P[m] = lpmv(m, l , costheta)	
-		Y = np.zeros(2*lmax+1, dtype=np.complex_)
+    # when costheta=1, Plm is zero except for m=0 where it is 1
+    # hence eiphi only appears for m=0 where eiphi^m=1
 
-		# m from -lmax to lmax
-		# only cases with m from -l to l will be computed 
-		for m in range(l+1): # 0<=m<=l
-			# i = m+lmax+1
-			Klm = np.sqrt((2*l+1)*fact(l-m)/(4*np.pi*fact(l+m)))
-			Y[m+lmax] = Klm * P[m] * eiphi**m
-			Y[-m+lmax] = Klm * P[m] * eiphi**(-m) * (-1)**m
-		
-		jl = np.sqrt(np.pi/(2*kr))*jv(l+1/2, kr) # scalar
-		u[l*(2*lmax+1):((l+1)*(2*lmax+1))] = jl*Y # size 2*lmax+1
+    u = np.zeros((lmax+1)*(2*lmax+1), dtype=np.complex_)
 
-	return u 
+    for l in range(lmax+1): # 0<=l<=lmax
+        # computes for all values 0<=m<=l
+        P = np.zeros(l+1)
+        for m in range(l+1):
+            P[m] = lpmv(m, l , costheta)
+        Y = np.zeros(2*lmax+1, dtype=np.complex_)
+        
+        # m from -lmax to lmax
+        # only cases with m from -l to l will be computed 
+        for m in range(l+1): # 0<=m<=l
+            # i = m+lmax+1
+            Klm = np.sqrt((2*l+1)*fact(l-m)/(4*np.pi*fact(l+m)))
+            Y[m+lmax] = Klm * P[m] * eiphi**m
+            Y[-m+lmax] = Klm * P[m] * eiphi**(-m) * (-1)**m
+            
+        jl = np.sqrt(np.pi/(2*kr))*jv(l+1/2, kr) # scalar
+        u[l*(2*lmax+1):((l+1)*(2*lmax+1))] = jl*Y # size 2*lmax+1
+
+    return u 
 
 
 def a_coeff(l1, m1, l2, m2):
-	'''
-	function that computes the coeff a(alpha,beta) that corresponds
-	to the decomposition of the product of Y's in spherical harmonics
-	0<=alpha<=l1+l2 and beta=m1+m2
-	and returns a numpy vector of size l1+l2+1
-	'''
+    '''
+    function that computes the coeff a(alpha,beta) that corresponds
+    to the decomposition of the product of Y's in spherical harmonics
+    0<=alpha<=l1+l2 and beta=m1+m2
+    and returns a numpy vector of size l1+l2+1
+    '''
 
-	N_alpha = l1+l2+1
-	alpha = np.arange(N_alpha)
-	C = CG_coeff(l1, m1, l2, m2) # size l1+l2+2 for alpha from 0 to l1+l2+1
-	C0 = CG_coeff(l1, 0, l2, 0) # idem
-	# only uses values of alpha from 0 to l1+l2 (not the last one)
-	a = np.sqrt((2*l1+1)*(2*l2+1)/(4*np.pi*(2*alpha+1))) * C[:N_alpha] * C0[:N_alpha]
-	return a
+    N_alpha = l1+l2+1
+    alpha = np.arange(N_alpha)
+    C = CG_coeff(l1, m1, l2, m2) # size l1+l2+2 for alpha from 0 to l1+l2+1
+    C0 = CG_coeff(l1, 0, l2, 0) # idem
+    
+    # only uses values of alpha from 0 to l1+l2 (not the last one)
+    a = np.sqrt((2*l1+1)*(2*l2+1)/(4*np.pi*(2*alpha+1))) * C[:N_alpha] * C0[:N_alpha]
+    
+    return a
 
 
 def CG_coeff(l1, m1, l2, m2):
-	'''
-	function that derives the Clebsch-Gordan coefficients C
-	for 0<=alpha<=l1+l2+1 and beta=m1+m2
-	and returns a numpy vector of size l1+l2+2
-	'''
-	
-	beta = m1 + m2
-	N = l1 + l2 + 2
-	C = np.zeros(N)
+    '''
+    function that derives the Clebsch-Gordan coefficients C
+    for 0<=alpha<=l1+l2+1 and beta=m1+m2
+    and returns a numpy vector of size l1+l2+2
+    '''
 
-	alpha=l1+l2+1 # (=N-1, and i=l1+l2+2=N)
-	C[alpha] = 0
+    beta = m1 + m2
+    N = l1 + l2 + 2
+    C = np.zeros(N)
 
-	alpha = l1+l2 # (=N-2, and i=l1+l2+1=N-1)
-	C[alpha] = np.sqrt(fact(l1+l2+m1+m2) * fact(l1+l2-m1-m2)/(fact(l1+m1) * fact(l1-m1) * fact(l2+m2) * fact(l2-m2))) * np.sqrt(fact(2*l1) * fact(2*l2) / fact(2*l1+2*l2))
-	
-	for alpha in range(N-3,-1,-1):
-		if (alpha >= max(abs(l2-l1),abs(beta))):
-			zeta = m1 - m2 - beta*(l1*(l1+1)-l2*(l2+1))/((alpha+1)*(alpha+2))
-			xi = ((alpha+1)**2-beta**2) * ((alpha+1)**2-(l1-l2)**2) * ((l1+l2+1)**2-(alpha+1)**2)/((alpha+1)**2*(4*(alpha+1)**2-1))
-			xiplus = ((alpha+2)**2-beta^2) * ((alpha+2)**2-(l1-l2)**2) * ((l1+l2+1)**2-(alpha+2)**2)/((alpha+2)**2*(4*(alpha+2)**2-1))
-			C[alpha] = zeta/np.sqrt(xi)*C[alpha+1] - np.sqrt(xiplus/xi)*C[alpha+2]
+    alpha=l1+l2+1 # (=N-1, and i=l1+l2+2=N)
+    C[alpha] = 0
 
-	return C
+    alpha = l1+l2 # (=N-2, and i=l1+l2+1=N-1)
+    C[alpha] = np.sqrt(fact(l1+l2+m1+m2) * fact(l1+l2-m1-m2)/(fact(l1+m1) * fact(l1-m1) * fact(l2+m2) * fact(l2-m2))) * np.sqrt(fact(2*l1) * fact(2*l2) / fact(2*l1+2*l2))
+
+    for alpha in range(N-3,-1,-1):
+        if (alpha >= max(abs(l2-l1),abs(beta))):
+            zeta = m1 - m2 - beta*(l1*(l1+1)-l2*(l2+1))/((alpha+1)*(alpha+2))
+            
+            xi = (((alpha+1)**2-beta**2) * ((alpha+1)**2-(l1-l2)**2) 
+                  * ((l1+l2+1)**2-(alpha+1)**2)) / ((alpha+1)**2*(4*(alpha+1)**2-1))
+            
+            xiplus = (((alpha+2)**2-beta^2) * ((alpha+2)**2-(l1-l2)**2)
+                      * ((l1+l2+1)**2-(alpha+2)**2)) / ((alpha+2)**2*(4*(alpha+2)**2-1))
+            
+            C[alpha] = zeta/np.sqrt(xi)*C[alpha+1] - np.sqrt(xiplus/xi)*C[alpha+2]
+
+    return C
