@@ -2,93 +2,110 @@ import numpy as np
 from math import factorial as fact
 from scipy.special import jv, lpmv
 
+
 # first level
 # -----------
 
+
 def matrix_Sdip(pos, alpha, lmax):
-	'''
-	generates the scattering matrix S
-	from the diffusion matrix D
-	in the case of dipolar scatterers
-	with positions pos and polarizabilities alpha
-	pos has size (3,N) and alpha has size N
-	alpha must be already multiplied by k^3 to be adimensional
-	'''
-
-	Nsph = 2*lmax*(2*lmax+1)
-
-	N = pos.shape[1] # number of particles
-	D = matrix_Ddip(pos, alpha, lmax)
-	S = np.eye(Nsph) + 2*D
-	return S
+    '''
+    generates the scattering matrix S
+    with spherical modes up to l=lmax
+    in the case of N dipolar scatterers
+    with positions pos and polarizabilities alpha
+    pos has size (3, N) and alpha has size N
+    alpha is multiplied by k**3 to be adimensional
+    '''
+    
+    # number of spherical modes
+    Nsph = 2*lmax*(2*lmax+1)
+    
+    # diffusion matrix for the N scatterers
+    D = matrix_Ddip(pos, alpha, lmax)
+    
+    # scattering matrix for the N scatterers
+    S = np.eye(Nsph) + 2*D
+    
+    return S
 
 
 def matrix_Ddip(pos, alpha, lmax):
-	'''
-	generates the diffusion matrix D
-	in the case of dipolar scatterers
-	with positions pos and polarizabilities alpha
-	pos has size (3,N) and alpha has size N
-	alpha must be already multiplied by k^3 to be adimensional
-	'''
-	N = pos.shape[1] # number of particles
-	TQ = matrix_TQdip(pos, alpha, lmax) # size Nsph by 3N
-	X = matrix_Xdip(pos, alpha) # size 3N by 3N
-	FT = matrix_FTdip(pos, alpha, lmax) # size 3N by Nsph
-	D = np.dot(TQ, np.linalg.inv(np.eye(3*N) - X)).dot(FT)
-	return D # size Nsph by Nsph
+    '''
+    generates the diffusion matrix D
+    with spherical modes up to l=lmax
+    in the case of N dipolar scatterers
+    with positions pos and polarizabilities alpha
+    pos has size (3, N) and alpha has size N
+    alpha is multiplied by k**3 to be adimensional
+    '''
+    
+    N = pos.shape[1] # number of particles
+    
+    TQ = matrix_TQdip(pos, alpha, lmax) # size Nsph by 3N
+    X = matrix_Xdip(pos, alpha) # size 3N by 3N
+    FT = matrix_FTdip(pos, alpha, lmax) # size 3N by Nsph
+    
+    D = np.dot(TQ, np.linalg.inv(np.eye(3*N) - X)).dot(FT)
+
+    return D # size Nsph by Nsph
 
 
-# needs for first level: matrix_TQdip, matrix_Xdip, matrix_FTdip
+### subfunctions needed for first level: matrix_TQdip, matrix_Xdip, matrix_FTdip
+
 
 # second level
 # ------------
 
-def matrix_Xdip(pos, alpha):
-	'''
-	generates the structure X matrix
-	in the case of dipolar scatterers
-	with positions pos and polarizabilities alpha
-	pos has size (3,N) and alpha has size N
-	alpha is multiplied by k^3 to be adimensional
-	'''
 
-	N = pos.shape[1] # number of particles
-	X = np.zeros((3*N, 3*N),  dtype=np.complex_)
-	for i in range(N):
-		for j in range(N):
-			if i!=j:
-				X[(3*i):(3*(i+1)),(3*j):(3*(j+1))] = alpha[j] * eval_green(pos[:,i],pos[:,j])
-	return X
+def matrix_Xdip(pos, alpha):
+    '''
+    generates the structure X matrix
+    in the case of N dipolar scatterers
+    with positions pos and polarizabilities alpha
+    pos has size (3, N) and alpha has size N
+    alpha is multiplied by k**3 to be adimensional
+    '''
+
+    N = pos.shape[1] # number of particles
+    X = np.zeros((3*N, 3*N),  dtype=np.complex_)
+
+    for i in range(N):
+        for j in range(N):
+            if i!=j: # outside diagonal blocks
+                X[(3*i):(3*(i+1)),(3*j):(3*(j+1))] = alpha[j] * eval_green(pos[:,i],pos[:,j])
+
+    return X
 
 
 def matrix_FTdip(pos, alpha, lmax):
-	'''
-	generates the (3N, Nsph) F*T block matrix
-	in the case of dipolar scatterers
-	with positions pos and polarizabilities alpha
-	pos has size (3,N) and alpha has size N
-	alpha is multiplied by k^3 to be adimensional
-	'''
+    '''
+    generates the (3*N, Nsph) F*T block matrix
+    in the case of N dipolar scatterers
+    with positions pos and polarizabilities alpha
+    pos has size (3, N) and alpha has size N
+    alpha is multiplied by k**3 to be adimensional
+    '''
 
-	N = pos.shape[1] # number of particles
-	Nsph = 2*lmax*(2*lmax+1) # number os spherical modes (with reduced notation)
-	# l from 1 to lmax and m from -l to l (-> -lmax, +lmax)
-	# i = (l-1)*(2*lmax+1)+m+lmax
+    N = pos.shape[1] # number of particles
+    Nsph = 2*lmax*(2*lmax+1) # number of spherical modes (with reduced notation)
 
-	# construction of the generic F matrix, size 3 by Nsph 
-	F = np.zeros((3, Nsph), dtype=np.complex_)
-	# only non-zero rows are Alm with l=1 m from -1 to 1
-	# then i from lmax-1 to lmax+1 (included)
-	F[:, (lmax-1):(lmax+2)] = [[1j,   0, -1j], 
-							   [1,    0, 1], 
-							   [0,  1j*np.sqrt(2), 0]] / np.sqrt(12*np.pi)
+    # conversion between double (l,m) and simple (i) indexing:
+    # l from 1 to lmax and m from -l to l (-> -lmax, +lmax for simplicity)
+    # i = (l-1)*(2*lmax+1)+m+lmax goes from 0 to Nsph/2-1
 
-	FT = np.zeros((3*N, Nsph), dtype=np.complex_)
-	for i in range(N):
-		T = translate_reduced(-pos[:,i], lmax) # size Nsph by Nsph
-		FT[(i*3):((i+1)*3),:] = np.dot(F,T) # block of size 3 by Nsph
-	return FT # size 3N by Nsph
+    # construction of the generic F matrix, size 3 by Nsph 
+    F = np.zeros((3, Nsph), dtype=np.complex_)
+    # only non-zero rows are Alm with l=1, m from -1 to 1
+    # then i from lmax-1 to lmax+1 (included)
+    F[:, (lmax-1):(lmax+2)] = [[1j,   0, -1j],
+                               [1,    0, 1], 
+                               [0,  1j*np.sqrt(2), 0]] / np.sqrt(12*np.pi)
+
+    FT = np.zeros((3*N, Nsph), dtype=np.complex_)
+    for i in range(N):
+        T = translate_reduced(-pos[:,i], lmax) # size Nsph by Nsph
+        FT[(i*3):((i+1)*3),:] = np.dot(F,T) # block of size 3 by Nsph
+    return FT # size 3N by Nsph
 
 
 def matrix_TQdip(pos, alpha, lmax):
@@ -116,7 +133,7 @@ def matrix_TQdip(pos, alpha, lmax):
 	TQ = np.zeros((Nsph,3*N), dtype=np.complex_)
 	for i in range(N):
 		T = translate_reduced(pos[:,i], lmax) # size Nsph by Nsph
-		TQ[:,(i*3):((i+1)*3)] = alpha[i]*np.dot(T,Q) # size Nsph by 3
+		TQ[:, 3*i : 3*(i+1)] = alpha[i] * np.dot(T,Q) # size Nsph by 3
 
 	return TQ # size Nsph by 3N
 
