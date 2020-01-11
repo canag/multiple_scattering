@@ -105,40 +105,41 @@ def matrix_FTdip(pos, alpha, lmax):
     for i in range(N):
         T = translate_reduced(-pos[:,i], lmax) # size Nsph by Nsph
         FT[(i*3):((i+1)*3),:] = np.dot(F,T) # block of size 3 by Nsph
+    
     return FT # size 3N by Nsph
 
 
 def matrix_TQdip(pos, alpha, lmax):
-	'''
-	generates the (Nsph, 3N) T*Q block matrix
-	in the case of dipolar scatterers
-	with positions pos and polarizabilities alpha
-	pos has size (3,N) and alpha has size N
-	alpha is multiplied by k^3 to be adimensional
-	'''
+    '''
+    generates the (Nsph, 3N) T*Q block matrix
+    in the case of dipolar scatterers
+    with positions pos and polarizabilities alpha
+    pos has size (3, N) and alpha has size N
+    alpha is multiplied by k**3 to be adimensional
+    '''
 
-	N = pos.shape[1] # number of particles
-	Nsph = 2*lmax*(2*lmax+1) # number os spherical modes (with reduced notation)
-	# l from 1 to lmax and m from -l to l (-> -lmax, +lmax)
-	# i = (l-1)*(2*lmax+1)+m+lmax
+    N = pos.shape[1] # number of particles
+    Nsph = 2*lmax*(2*lmax+1) # number os spherical modes (with reduced notation)
+    # l from 1 to lmax and m from -l to l (-> -lmax, +lmax)
+    # i = (l-1)*(2*lmax+1)+m+lmax
 
-	# construction of the generic Q matrix, size Nsph by 3 
-	Q = np.zeros((Nsph, 3), dtype=np.complex_)
-	# only non-zero rows are Alm with l=1 m from -1 to 1
-	# then i from lmax-1 to lmax+1 (included)
-	Q[(lmax-1):(lmax+2),:] = [[1,  1j, 0],
-							[0,  0,  np.sqrt(2)],
-							[-1, 1j, 0]] / np.sqrt(12*np.pi)
-    
-	TQ = np.zeros((Nsph,3*N), dtype=np.complex_)
-	for i in range(N):
-		T = translate_reduced(pos[:,i], lmax) # size Nsph by Nsph
-		TQ[:, 3*i : 3*(i+1)] = alpha[i] * np.dot(T,Q) # size Nsph by 3
+    # construction of the generic Q matrix, size Nsph by 3 
+    Q = np.zeros((Nsph, 3), dtype=np.complex_)
+    # only non-zero rows are Alm with l=1 m from -1 to 1
+    # then i from lmax-1 to lmax+1 (included)
+    Q[(lmax-1):(lmax+2),:] = [[1,  1j, 0],
+                              [0,  0,  np.sqrt(2)],
+                              [-1, 1j, 0]] / np.sqrt(12*np.pi)
 
-	return TQ # size Nsph by 3N
+    TQ = np.zeros((Nsph,3*N), dtype=np.complex_)
+    for i in range(N):
+        T = translate_reduced(pos[:,i], lmax) # size Nsph by Nsph
+        TQ[:, 3*i : 3*(i+1)] = alpha[i] * np.dot(T,Q) # size Nsph by 3
+
+    return TQ # size Nsph by 3N
 
 
-# needs for second level: eval_green, translate_reduced
+### subfunctions needed for second level: eval_green, translate_reduced
 
 
 # third level
