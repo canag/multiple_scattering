@@ -147,44 +147,49 @@ def matrix_TQdip(pos, alpha, lmax):
 
 
 def eval_green(pos1, pos2):
-	'''
-	function that evaluates the Green tensor in vacuum divided by k
-	between positions 1 and 2 (numpy vectors of size 3) written in units of k
-	returns a 3 by 3 complex matrix
-	'''
-	R = np.linalg.norm(pos1-pos2, 2) # scalar
-	u = (pos1-pos2)/R # unit vector, dim 3 by 1
+    '''
+    function that evaluates the Green tensor in vacuum divided by k
+    between positions 1 and 2 (numpy vectors of size 3) written in units of k
+    and returns a 3 by 3 complex matrix
+    '''
+	
+    R = np.linalg.norm(pos1-pos2, 2) # scalar
+    u = (pos1-pos2)/R # unit vector, dim 3 by 1
 
-	M = np.dot(u.reshape(-1,1), u.reshape(1, -1)) # 3 by 3 matrix
-	G = np.exp(1j*R) * ((R**2 + 1j*R - 1)/R**2*np.eye(3)
-						- (R**2 + 3*1j*R - 3)/R**2*M) / (4*np.pi*R)
-	return G
+    M = np.dot(u.reshape(-1,1), u.reshape(1, -1)) # 3 by 3 matrix
+    G = np.exp(1j*R) * ((R**2 + 1j*R - 1)/R**2*np.eye(3)
+                        - (R**2 + 3*1j*R - 3)/R**2*M) / (4*np.pi*R)
+    
+    return G
 
 
 def translate_reduced(rho, lmax):
-	'''
-	function that builds the translation matrix of size Nsph by Nsph
-	for both j2j and h2h modes, with reduced motation
-	rho is of size 3
-	'''
-	n = lmax*(2*lmax+1)
-	Nsph = 2*n
+    '''
+    function that builds the translation matrix of size Nsph by Nsph
+    for both j2j and h2h modes, with reduced motation
+    rho is of size 3
+    '''
+    
+    # n: size of the 4 square-blocks composing T matrix
+    n = lmax*(2*lmax+1)  
+    Nsph = 2*n 
 
-	T = np.zeros((Nsph, Nsph), dtype=np.complex_)
-	if np.linalg.norm(rho)==0:
-		T = T + np.ones((Nsph, Nsph)) # size 2n by 2n
-	else:
-		B = Brho_matrix(rho, lmax) # size n by n
-		C = Crho_matrix(rho, lmax) # idem
-		T[:n, :n] = B
-		T[:n, n:] = 1j*C
-		T[n:, :n] = -1j*C
-		T[n:, n:] = B
+    T = np.zeros((Nsph, Nsph), dtype=np.complex_)
+    
+    if np.linalg.norm(rho)==0: # otherwise unstable behavior
+        T = T + np.ones((Nsph, Nsph)) # size 2n by 2n
+    else:
+        B = Brho_matrix(rho, lmax) # size n by n
+        C = Crho_matrix(rho, lmax) # idem
+        T[:n, :n] = B
+        T[:n, n:] = 1j*C
+        T[n:, :n] = -1j*C
+        T[n:, n:] = B
 
-	return T
+    return T
 
 
-# needs for third level: Brho_matrix, Crho_matrix
+### subfunctions needed for third level: Brho_matrix, Crho_matrix
 
 
 # fourth level
