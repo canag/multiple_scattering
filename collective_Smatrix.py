@@ -177,7 +177,7 @@ def translate_reduced(rho, lmax):
     T = np.zeros((Nsph, Nsph), dtype=np.complex_)
     
     if np.linalg.norm(rho)==0: # otherwise unstable behavior
-        T = T + np.ones((Nsph, Nsph)) # size 2n by 2n
+        T = T + np.identity(Nsph) # size 2n by 2n
     else:
         B = Brho_matrix(rho, lmax) # size n by n
         C = Crho_matrix(rho, lmax) # idem
