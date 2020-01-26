@@ -4,7 +4,7 @@ def platonic(N, ka):
     if N==4:
         return tetrahedron(ka)
     elif N==6:
-        return octohedron(ka)
+        return octahedron(ka)
     elif N==8:
         return cube(ka)
     elif N==12:
