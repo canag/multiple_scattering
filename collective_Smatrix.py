@@ -209,30 +209,36 @@ def Brho_matrix(rho, lmax):
     # 1<=l<=lmax and -lmax<=m<=lmax gives i in [0,n-1]
     B = np.zeros((n, n), dtype=np.complex_)
 
-    # scalar spherical harmonics evaluated at rho
-    # linevector of size n_u = (2*lmax+1)*(4*lmax+1)
+    # scalar spherical harmonics u_alpha,beta evaluated at rho
+    # alpha between |l1-l2| and l1+l2 (included)
+    # therefore values 0 to 2*lmax are needed
+    # beta = m2-m1 can take values between -2*l and 2*l
+    u_rho = eval_u1(2*lmax, rho)
+    # u is a vector of size n_u = (2*lmax+1)*(4*lmax+1)
     # with index ind = alpha*(4*lmax+1)+beta+2*lmax
     # where alpha from 0 to 2*lmax
     # and beta from -2*lmax to +2*lmax
-    # gives ind from 0 to n_u-1
-    u_rho = eval_u1(2*lmax, rho) 
+
+     
 
     for l1 in range(1, lmax+1):
         for l2 in range(1, lmax+1):
             for m1 in range(-l1, l1+1):
                 for m2 in range(-l2, l2+1):
+                    # composite indices for l from 1 to lmax, |m|<=lmax 
                     i1 = (l1-1)*(2*lmax+1) + m1 + lmax
                     i2 = (l2-1)*(2*lmax+1) + m2 + lmax
 
                     alpha = np.arange(0, l1+l2+1) # size l1+l2+1
-                    a = a_coeff(l1,-m1,l2,m2) # 0<=alpha<=l1+l2, size l1+l2+1
+                    a = a_coeff(l1, -m1, l2, m2) # 0<=alpha<=l1+l2, size l1+l2+1
                     K_alpha = (l1*(l1+1)+l2*(l2+1)-alpha*(alpha+1)) / (2*np.sqrt(l1*(l1+1)*l2*(l2+1)))
 
-                    ind = alpha*(4*lmax+1)+m2-m1+2*lmax # indices where beta=m2-m1
-                    u = u_rho[ind]
+                    # indices in vector u where beta=m2-m1
+                    ind = alpha*(4*lmax+1)+m2-m1+2*lmax 
+                    u = u_rho[ind] # size l1+l2+1
 
                     # sum for alpha from 0 to l1+l2
-                    B[i1, i2] = ((-1)**m1) * 4*np.pi*1j**(l2-l1) * np.sum(1j**alpha*K_alpha*a*u)
+                    B[i1, i2] = ((-1)**m1) * 4*np.pi * 1j**(l2-l1) * np.sum(1j**alpha*K_alpha*a*u)
 
     return B
 
@@ -376,7 +382,7 @@ def a_coeff(l1, m1, l2, m2):
     C0 = CG_coeff(l1, 0, l2, 0) # idem
     
     # only uses values of alpha from 0 to l1+l2 (not the last one)
-    a = np.sqrt((2*l1+1)*(2*l2+1)/(4*np.pi*(2*alpha+1))) * C[:N_alpha] * C0[:N_alpha]
+    a = np.sqrt((2*l1+1)*(2*l2+1)/(4*np.pi*(2*alpha+1))) * C[:-1] * C0[:-1]
     
     return a
 
@@ -392,20 +398,21 @@ def CG_coeff(l1, m1, l2, m2):
     N = l1 + l2 + 2
     C = np.zeros(N)
 
-    alpha=l1+l2+1 # (=N-1, and i=l1+l2+2=N)
+    alpha = l1 + l2 + 1 # (=N-1, and i=l1+l2+2=N)
     C[alpha] = 0
 
     alpha = l1+l2 # (=N-2, and i=l1+l2+1=N-1)
-    C[alpha] = np.sqrt(fact(l1+l2+m1+m2) * fact(l1+l2-m1-m2)/(fact(l1+m1) * fact(l1-m1) * fact(l2+m2) * fact(l2-m2))) * np.sqrt(fact(2*l1) * fact(2*l2) / fact(2*l1+2*l2))
+    C[alpha] = np.sqrt(fact(l1+l2+m1+m2) * fact(l1+l2-m1-m2)
+                       /(fact(l1+m1) * fact(l1-m1) * fact(l2+m2) * fact(l2-m2)))* np.sqrt(fact(2*l1) * fact(2*l2) / fact(2*l1 + 2*l2))
 
     for alpha in range(N-3,-1,-1):
-        if (alpha >= max(abs(l2-l1),abs(beta))):
+        if (alpha >= max(abs(l2-l1),abs(beta))): # 0 if alpha<|l1-l2| or |beta|
             zeta = m1 - m2 - beta*(l1*(l1+1)-l2*(l2+1))/((alpha+1)*(alpha+2))
             
             xi = (((alpha+1)**2-beta**2) * ((alpha+1)**2-(l1-l2)**2) 
-                  * ((l1+l2+1)**2-(alpha+1)**2)) / ((alpha+1)**2*(4*(alpha+1)**2-1))
+                  * ((l1+l2+1)**2-(alpha+1)**2)) / ((alpha+1)**2 * (4*(alpha+1)**2-1))
             
-            xiplus = (((alpha+2)**2-beta^2) * ((alpha+2)**2-(l1-l2)**2)
+            xiplus = (((alpha+2)**2-beta**2) * ((alpha+2)**2-(l1-l2)**2)
                       * ((l1+l2+1)**2-(alpha+2)**2)) / ((alpha+2)**2*(4*(alpha+2)**2-1))
             
             C[alpha] = zeta/np.sqrt(xi)*C[alpha+1] - np.sqrt(xiplus/xi)*C[alpha+2]
