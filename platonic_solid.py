@@ -71,7 +71,7 @@ def icosahedron(ka):
     pos[:, 8] = [0, phi, 1]
     pos[:, 9] = [0, phi,-1]
     pos[:,10] = [0,-phi, 1]
-    pos[:,11] = [0,-phi, 1]   
+    pos[:,11] = [0,-phi,-1]   
 
     return pos*ka/np.sqrt(1+phi**2)
 
