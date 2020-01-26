@@ -48,4 +48,19 @@ def matrix_Xdip_xi(pos, alpha):
     return X
 
 
+def eval_green_xi(pos1, pos2):
+    '''
+    function that evaluates the Green tensor in vacuum 
+    at imaginary frequencies, divided by kappa
+    between positions 1 and 2 (numpy vectors of size 3) written in units of k
+    and returns a 3 by 3 complex matrix
+    '''
+	
+    R = np.linalg.norm(pos1-pos2, 2) # scalar
+    u = (pos1-pos2)/R # unit vector, dim 3 by 1
 
+    M = np.dot(u.reshape(-1,1), u.reshape(1, -1)) # 3 by 3 matrix
+    G = np.exp(-R) * ((R**2 + R + 1)/R**2*np.eye(3)
+                      - (R**2 + 3*R + 3)/R**2*M) / (4*np.pi*R)
+    
+    return G
