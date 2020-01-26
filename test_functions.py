@@ -30,9 +30,9 @@ def test_CGcoeff2010():
     b = tools.CG_coeff(2, 0, 1, 0)
     assert (norm(a-b)/norm(a))<1e-10
 
-def test_CGcoeff2110():
+def test_CGcoeff2111():
     a = np.array([0, 0, -np.sqrt(1/3), np.sqrt(2/3), 0])
-    b = tools.CG_coeff(2, 1, 1, 0)
+    b = tools.CG_coeff(2, 1, 1, 1)
     assert (norm(a-b)/norm(a))<1e-10
 
 def test_CGcoeff2210():
