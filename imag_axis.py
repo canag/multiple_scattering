@@ -1,7 +1,6 @@
 
 import numpy as np
 
-# TODO: modify to correspond to integrand_NP_imagaxis.m
 def integrand_NP_imagaxis(akappa, aGamma, ak0, delta, pos):
     '''
     function that evaluates the integrand on the imaginary axis
@@ -13,11 +12,6 @@ def integrand_NP_imagaxis(akappa, aGamma, ak0, delta, pos):
     '''
 
     N = pos.shape[1] # number of particles
-
-    # alpha is a vector of size n, like akappa
-    alpha = -6*np.pi*aGamma*akappa**3 / (ak0**2*(akappa**2+ak0**2)
-            - aGamma*akappa**3 / (1+akappa/arho))
-    
     z = 0*akappa # vector of size n
 
     for i, ak in enumerate(akappa):
