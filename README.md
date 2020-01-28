@@ -1,4 +1,4 @@
-# multiple_scattering
+# Multiple Scattering 
 
 This repository contains the codes developed in the article "Scattering properties of collective dipolar systems" by A. Canaguier-Durand, A. Lambrecht and S. Reynaud, to model optical properties of collective dipolar systems. 
 
