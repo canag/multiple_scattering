@@ -1,25 +1,22 @@
 
 import numpy as np
 
-def integrand_NP_imagaxis(akappa, aGamma, ak0, delta, pos):
+def integrand_NP_imagaxis(ak, aGamma, ak0, delta, pos):
     '''
     function that evaluates the integrand on the imaginary axis
     from the X operator evaluated for xi = i*omega
-    akappa can be a vector of dimension n
+    ak is a scalar (could be vectorized for performance)
     delta, aGamma and ak0 are scalar
     the 2 later correspond to adimensional a*Gamma/c and a*omega_0/c
     pos has size (3,N) and is normalized by ka
     '''
 
     N = pos.shape[1] # number of particles
-    z = 0*akappa # vector of size n
+    alpha = -6*np.pi*aGamma*ak**3 / (ak0**2*(ak**2 + ak0**2 + np.sqrt(3)*delta*ak*ak0) - aGamma*ak**3)
+    X = matrix_Xdip_xi(pos*ak, alpha + np.zeros(N))
 
-    for i, ak in enumerate(akappa):
-        alpha = -6*np.pi*aGamma*ak**3 / (ak0**2*(ak**2 + ak0**2 + np.sqrt(3)*delta*ak*ak0) - aGamma*ak**3)
-        X = matrix_Xdip_xi(pos*ak, alpha + np.zeros(N))
-        z[i] = np.log(np.linalg.det(np.identity(3*N) - X))
+    return np.log(np.linalg.det(np.identity(3*N) - X))
 
-    return z
 
 
 def matrix_Xdip_xi(pos, alpha):
