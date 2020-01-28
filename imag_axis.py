@@ -29,7 +29,7 @@ def matrix_Xdip_xi(pos, alpha):
     '''
 
     N = pos.shape[1] # number of particles
-    X = np.zeros((3*N, 3*N),  dtype=np.complex_)
+    X = np.zeros((3*N, 3*N))
 
     for i in range(N):
         for j in range(N):
