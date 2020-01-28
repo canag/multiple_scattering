@@ -5,7 +5,7 @@ This repository contains the codes developed in the article "Scattering properti
 
 # Organisation of the repository
 
-- `collective_Smatrix.py` contains all tool functions to compute the collective scattering matrix of a collective dipolar ensemble. It is organized in successive levels, starting from the global and user-friendly functions, each layer using subroutines from the lower layer.
+- `collective_Smatrix.py` contains all tool functions to compute the collective scattering matrix of a collective dipolar ensemble. It is organized in successive levels (*aka lasagna code$), starting from the global and user-friendly functions, each layer using subroutines from the lower layer.
 - `imag_axis.py` contains tools functions to compute collective radiation corrections in such dipolar ensembles, with additional functions that evaluate the structure X matrix at imaginary frequencies.
 - `platonic_solid.py` give the positions of the vertices for Platonic solids.
 - `collective_dipolar_figures_part1.ipynb` is a notebook that replicates the figure 2 of the paper, computing the relative variation of the absorption of a single nanoparticle when adding an external shell of non-absorbing nanoparticles.
