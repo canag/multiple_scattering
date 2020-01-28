@@ -2,4 +2,3 @@
 .vscode/
 .DS_Store
 __pycache__/
-save_fig1.pickle
