@@ -46,6 +46,152 @@ def test_CGcoeff2020():
     assert (norm(a-b)/norm(a))<1e-10
 
 
+# test on Platonic solids
+# -----------------------
+
+def test_platonic_dist_to_center():
+    cond = True
+    for N in [5, 7, 9, 13, 21]:
+        ka = np.random.uniform(1,5)
+        pos = np.zeros((3,N))
+        pos[:, :-1] = positions.platonic(N-1, ka)
+        for i in range(N-1):
+            cond = cond & ((norm(pos[:,i]-pos[:,-1])/ka-1)<1e-10)
+    
+    assert cond
+
+# test the length of edges
+
+def test_platonic_N4():
+    N = 4
+    nei = 3 # number of neighbors for each vertex
+    val = np.sqrt(8/3) # expected value for unity solid
+
+    ka = np.random.uniform(1,5)
+    valka = val*ka
+    pos = positions.platonic(N, ka)
+
+    vertices_dist = []
+    for i in range(N):
+        for j in range(N):
+            if i<j:
+                vertices_dist.append(norm(pos[:,i]-pos[:,j]))
+    vertices_dist.sort()
+
+    n = int(N*nei/2)
+    cond_1 = (np.array([norm(v-valka) for v in vertices_dist[:n]])<1e-10).all()
+    if N>n:
+        cond_2 = (vertices_dist[n]-valka)>1e-10
+    else:
+        cond_2 = True
+
+    assert cond_1 & cond_2
+
+
+def test_platonic_N6():
+    N = 6
+    nei = 4 # number of neighbors for each vertex
+    val = np.sqrt(2) # expected value for unity solid
+
+    ka = np.random.uniform(1,5)
+    valka = val*ka
+    pos = positions.platonic(N, ka)
+
+    vertices_dist = []
+    for i in range(N):
+        for j in range(N):
+            if i<j:
+                vertices_dist.append(norm(pos[:,i]-pos[:,j]))
+    vertices_dist.sort()
+
+    n = int(N*nei/2)
+    cond_1 = (np.array([norm(v-valka) for v in vertices_dist[:n]])<1e-10).all()
+    if N>n:
+        cond_2 = (vertices_dist[n]-valka)>1e-10
+    else:
+        cond_2 = True
+
+    assert cond_1 & cond_2
+
+
+def test_platonic_N8():
+    N = 8
+    nei = 3 # number of neighbors for each vertex
+    val = 2/np.sqrt(3) # expected value for unity solid
+
+    ka = np.random.uniform(1,5)
+    valka = val*ka
+    pos = positions.platonic(N, ka)
+
+    vertices_dist = []
+    for i in range(N):
+        for j in range(N):
+            if i<j:
+                vertices_dist.append(norm(pos[:,i]-pos[:,j]))
+    vertices_dist.sort()
+
+    n = int(N*nei/2)
+    cond_1 = (np.array([norm(v-valka) for v in vertices_dist[:n]])<1e-10).all()
+    if N>n:
+        cond_2 = (vertices_dist[n]-valka)>1e-10
+    else:
+        cond_2 = True
+
+    assert cond_1 & cond_2
+
+
+def test_platonic_N12():
+    N = 12
+    nei = 5 # number of neighbors for each vertex
+    val = 4/np.sqrt(10+2*np.sqrt(5)) # expected value for unity solid
+
+    ka = np.random.uniform(1,5)
+    valka = val*ka
+    pos = positions.platonic(N, ka)
+
+    vertices_dist = []
+    for i in range(N):
+        for j in range(N):
+            if i<j:
+                vertices_dist.append(norm(pos[:,i]-pos[:,j]))
+    vertices_dist.sort()
+
+    n = int(N*nei/2)
+    cond_1 = (np.array([norm(v-valka) for v in vertices_dist[:n]])<1e-10).all()
+    if N>n:
+        cond_2 = (vertices_dist[n]-valka)>1e-10
+    else:
+        cond_2 = True
+
+    assert cond_1 & cond_2
+
+
+def test_platonic_N20():
+    N = 20
+    nei = 3 # number of neighbors for each vertex
+    val = 4/((1+np.sqrt(5))*np.sqrt(3)) # expected value for unity solid
+
+    ka = np.random.uniform(1,5)
+    valka = val*ka
+    pos = positions.platonic(N, ka)
+
+    vertices_dist = []
+    for i in range(N):
+        for j in range(N):
+            if i<j:
+                vertices_dist.append(norm(pos[:,i]-pos[:,j]))
+    vertices_dist.sort()
+
+    n = int(N*nei/2)
+    cond_1 = (np.array([norm(v-valka) for v in vertices_dist[:n]])<1e-10).all()
+    if N>n:
+        cond_2 = (vertices_dist[n]-valka)>1e-10
+    else:
+        cond_2 = True
+
+    assert cond_1 & cond_2
+
+
 # test on translations
 # --------------------
 
